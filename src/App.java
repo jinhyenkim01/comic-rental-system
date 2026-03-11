@@ -11,6 +11,7 @@ public class App {
 
     // Repository 인스턴스들
     private ComicRepository comicRepository;
+    private MemberRepository memberRepository;
 
     public App() {
         this.scanner = new Scanner(System.in);
@@ -18,6 +19,7 @@ public class App {
 
         // Repository 초기화
         this.comicRepository = new ComicRepository();
+        this.memberRepository = new MemberRepository();
     }
 
     /**
@@ -79,6 +81,12 @@ public class App {
             case "comic-delete":
                 deleteComic(rq);
                 break;
+            case "member-add":
+                addMember();
+                break;
+            case "member-list":
+                listMembers();
+                break;
             default:
                 System.out.println("알 수 없는 명령어입니다. 'help'를 입력해주세요.");
                 break;
@@ -103,6 +111,8 @@ public class App {
         System.out.println("comic-detail [id]    : 만화책 상세보기");
         System.out.println("comic-update [id]    : 만화책 수정");
         System.out.println("comic-delete [id]    : 만화책 삭제");
+        System.out.println("member-add           : 회원 등록");
+        System.out.println("member-list          : 회원 목록");
         System.out.println("help                 : 도움말");
         System.out.println("exit                 : 종료\n");
     }
@@ -288,5 +298,57 @@ public class App {
         } else {
             System.out.println("만화책 삭제에 실패했습니다. (대여 기록이 있는 경우 삭제할 수 없습니다)");
         }
+    }
+
+    // ========== 회원 관련 기능 ==========
+
+    /**
+     * 회원 등록
+     */
+    private void addMember() {
+        System.out.print("이름: ");
+        String name = scanner.nextLine().trim();
+
+        if (name.isEmpty()) {
+            System.out.println("이름은 필수입니다.");
+            return;
+        }
+
+        System.out.print("전화번호 (선택사항): ");
+        String phone = scanner.nextLine().trim();
+
+        if (phone.isEmpty()) {
+            phone = null;
+        }
+
+        Member member = new Member(name, phone);
+        int id = memberRepository.addMember(member);
+
+        if (id > 0) {
+            System.out.println("=> 회원이 등록되었습니다. (id=" + id + ")");
+        } else {
+            System.out.println("회원 등록에 실패했습니다.");
+        }
+    }
+
+    /**
+     * 회원 목록 출력
+     */
+    private void listMembers() {
+        List<Member> members = memberRepository.getAllMembers();
+
+        if (members.isEmpty()) {
+            System.out.println("등록된 회원이 없습니다.");
+            return;
+        }
+
+        System.out.println("\n번호 | 이름       | 전화번호          | 등록일");
+        System.out.println("------------------------------------------------");
+
+        for (Member member : members) {
+            System.out.println(member.toString());
+        }
+
+        System.out.println("\n총 " + members.size() + "명의 회원이 등록되어 있습니다.");
     }
 }
